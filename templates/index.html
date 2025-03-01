@@ -9,130 +9,188 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         .timeline {
-            height: 4px;
+            height: 6px;
             background: #e5e7eb;
-            border-radius: 2px;
+            border-radius: 3px;
             overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
         }
         .timeline-progress {
             height: 100%;
-            transition: width 0.3s ease;
+            transition: width 0.6s ease, background-color 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .hover-scale {
+            transition: transform 0.2s ease;
+        }
+        .hover-scale:hover {
+            transform: scale(1.02);
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header Section -->
-        <div class="text-center mb-8">
-            <div class="flex justify-center mb-4">
-                <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-gray-200">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                    <span class="text-xl font-bold text-gray-900">SSL Checker</span>
+                </div>
+                <a href="/logout" class="px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span>Logout</span>
+                    </div>
+                </a>
             </div>
-            <h1 class="text-4xl font-bold text-gray-900 mb-2">SSL Certificate Checker</h1>
-            <p class="text-gray-600">Verify SSL certificates for any domain instantly</p>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 pt-24 pb-12">
+        <!-- Header Section -->
+        <div class="text-center mb-12 animate-fade-in">
+            <h1 class="text-5xl font-bold text-gray-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">SSL Certificate Checker</h1>
+            <p class="text-xl text-gray-600">Verify SSL certificates for any domain instantly</p>
         </div>
 
         <!-- Main Content -->
-        <div class="max-w-3xl mx-auto">
+        <div class="max-w-4xl mx-auto space-y-8">
             <!-- Search Form -->
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div class="glass-effect rounded-xl shadow-lg p-8 mb-8 animate-slide-up hover-scale">
                 <form id="sslCheckForm" class="space-y-4">
                     <div class="flex gap-4">
-                        <input type="text" id="domain" name="domain" 
-                               class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                               placeholder="Enter domain (e.g., example.com)" required>
+                        <div class="flex-1 relative">
+                            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                                </svg>
+                            </div>
+                            <input type="text" id="domain" name="domain" 
+                                   class="w-full pl-12 pr-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring focus:ring-blue-200 transition-all duration-200"
+                                   placeholder="Enter domain (e.g., example.com)" required>
+                        </div>
                         <button type="submit" 
-                                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
-                            Check SSL
+                                class="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg flex items-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Check SSL</span>
                         </button>
                     </div>
                 </form>
             </div>
 
             <!-- Recent Checks -->
-            <div id="recentChecks" class="bg-white rounded-lg shadow-lg p-6 mb-6 hidden">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Recently Checked Domains</h3>
+            <div id="recentChecks" class="glass-effect rounded-xl shadow-lg p-6 mb-6 hidden animate-fade-in">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Recently Checked Domains</span>
+                </h3>
                 <div id="recentList" class="space-y-2">
                     <!-- Recent items will be added here -->
                 </div>
             </div>
 
             <!-- Loading Spinner -->
-            <div id="loading" class="hidden">
-                <div class="flex justify-center items-center space-x-2">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <span class="text-gray-600">Checking certificate...</span>
+            <div id="loading" class="hidden animate-fade-in">
+                <div class="flex justify-center items-center space-x-3 py-8">
+                    <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
+                    <span class="text-lg text-gray-600">Checking certificate...</span>
                 </div>
             </div>
 
             <!-- Results Section -->
-            <div id="results" class="hidden space-y-6">
+            <div id="results" class="hidden space-y-8 animate-slide-up">
                 <!-- Status Alert -->
-                <div id="status-alert" class="rounded-lg p-4 text-sm font-medium"></div>
+                <div id="status-alert" class="rounded-lg p-4 text-sm font-medium shadow-md"></div>
 
                 <!-- Health Score Card -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                <div class="glass-effect rounded-xl shadow-lg overflow-hidden hover-scale">
+                    <div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4">
                         <h2 class="text-xl font-semibold text-gray-800">Certificate Health Score</h2>
                     </div>
-                    <div class="p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div id="healthScore" class="text-4xl font-bold"></div>
-                            <div id="healthStatus" class="text-lg font-medium"></div>
+                    <div class="p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <div id="healthScore" class="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                            <div id="healthStatus" class="text-xl font-medium px-4 py-2 rounded-full"></div>
                         </div>
-                        <div class="timeline">
+                        <div class="timeline mb-4">
                             <div id="validityProgress" class="timeline-progress"></div>
                         </div>
-                        <div class="flex justify-between mt-2 text-sm text-gray-600">
-                            <span id="validFrom"></span>
-                            <span id="validUntil"></span>
+                        <div class="flex justify-between mt-2 text-sm font-medium">
+                            <span id="validFrom" class="text-gray-600"></span>
+                            <span id="validUntil" class="text-gray-600"></span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Certificate Details Card -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4 flex justify-between items-center">
+                <div class="glass-effect rounded-xl shadow-lg overflow-hidden hover-scale">
+                    <div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 flex justify-between items-center">
                         <h2 class="text-xl font-semibold text-gray-800">Certificate Details</h2>
-                        <button id="copyDetails" class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-2">
+                        <button id="copyDetails" class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-2 transition-colors duration-200">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
                             Copy Details
                         </button>
                     </div>
-                    <div class="p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Valid Until</label>
-                                    <span id="expiry" class="text-gray-900"></span>
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Valid Until</label>
+                                    <span id="expiry" class="text-gray-900 text-lg"></span>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Days Left</label>
-                                    <span id="daysLeft" class="text-gray-900"></span>
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Days Left</label>
+                                    <span id="daysLeft" class="text-gray-900 text-lg"></span>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Issuer</label>
-                                    <span id="issuer" class="text-gray-900"></span>
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Issuer</label>
+                                    <span id="issuer" class="text-gray-900 text-lg"></span>
                                 </div>
                             </div>
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Is Wild Card</label>
-                                    <span id="isWildCard" class="text-gray-900"></span>
+                            <div class="space-y-6">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Is Wild Card</label>
+                                    <span id="isWildCard" class="text-gray-900 text-lg"></span>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Self Signed</label>
-                                    <span id="canBeSelfSigned" class="text-gray-900"></span>
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Self Signed</label>
+                                    <span id="canBeSelfSigned" class="text-gray-900 text-lg"></span>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Valid From</label>
-                                    <span id="validFromDate" class="text-gray-900"></span>
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <label class="block text-sm font-medium text-gray-600 mb-1">Valid From</label>
+                                    <span id="validFromDate" class="text-gray-900 text-lg"></span>
                                 </div>
                             </div>
                         </div>
@@ -140,24 +198,24 @@
                 </div>
 
                 <!-- Security Recommendations -->
-                <div id="recommendations" class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                <div id="recommendations" class="glass-effect rounded-xl shadow-lg overflow-hidden hover-scale">
+                    <div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4">
                         <h2 class="text-xl font-semibold text-gray-800">Security Recommendations</h2>
                     </div>
-                    <div class="p-6">
-                        <ul id="recommendationsList" class="space-y-3 text-gray-700">
+                    <div class="p-8">
+                        <ul id="recommendationsList" class="space-y-4">
                             <!-- Recommendations will be added here -->
                         </ul>
                     </div>
                 </div>
 
                 <!-- Technical Details Card -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                <div class="glass-effect rounded-xl shadow-lg overflow-hidden hover-scale">
+                    <div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4">
                         <h2 class="text-xl font-semibold text-gray-800">Technical Details</h2>
                     </div>
-                    <div class="p-6">
-                        <pre id="certDetails" class="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm font-mono"></pre>
+                    <div class="p-8">
+                        <pre id="certDetails" class="bg-gray-50 rounded-lg p-6 overflow-x-auto text-sm font-mono"></pre>
                     </div>
                 </div>
             </div>
@@ -295,13 +353,13 @@
                 const healthStatus = document.getElementById('healthStatus');
                 if (healthScore >= 80) {
                     healthStatus.textContent = 'Excellent';
-                    healthStatus.className = 'text-lg font-medium text-green-600';
+                    healthStatus.className = 'text-xl font-medium text-green-600';
                 } else if (healthScore >= 60) {
                     healthStatus.textContent = 'Good';
-                    healthStatus.className = 'text-lg font-medium text-yellow-600';
+                    healthStatus.className = 'text-xl font-medium text-yellow-600';
                 } else {
                     healthStatus.textContent = 'Poor';
-                    healthStatus.className = 'text-lg font-medium text-red-600';
+                    healthStatus.className = 'text-xl font-medium text-red-600';
                 }
 
                 // Update timeline

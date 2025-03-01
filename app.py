@@ -19,7 +19,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY', 'dea6eeebf1mshb3d907739bceaeap12fcb0jsnba726620ee8e')
+# Load API configuration from environment
+RAPIDAPI_KEY = os.getenv('RAPIDAPI_KEY')
 RAPIDAPI_HOST = "check-ssl.p.rapidapi.com"
 
 @login_manager.user_loader
