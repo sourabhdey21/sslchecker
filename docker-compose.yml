@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - SECRET_KEY=your-secret-key-here
+      - DATABASE_URL=sqlite:///ssl_checker.db
+      - RAPIDAPI_KEY=dea6eeebf1mshb3d907739bceaeap12fcb0jsnba726620ee8e
+    volumes:
+      - .:/app
+      - ssl_data:/app/instance
+
+volumes:
+  ssl_data: 

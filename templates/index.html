@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSL Certificate Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .timeline {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .timeline-progress {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">SSL Certificate Checker</h1>
+            <p class="text-gray-600">Verify SSL certificates for any domain instantly</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-3xl mx-auto">
+            <!-- Search Form -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <form id="sslCheckForm" class="space-y-4">
+                    <div class="flex gap-4">
+                        <input type="text" id="domain" name="domain" 
+                               class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                               placeholder="Enter domain (e.g., example.com)" required>
+                        <button type="submit" 
+                                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                            Check SSL
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Recent Checks -->
+            <div id="recentChecks" class="bg-white rounded-lg shadow-lg p-6 mb-6 hidden">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Recently Checked Domains</h3>
+                <div id="recentList" class="space-y-2">
+                    <!-- Recent items will be added here -->
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading" class="hidden">
+                <div class="flex justify-center items-center space-x-2">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span class="text-gray-600">Checking certificate...</span>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="hidden space-y-6">
+                <!-- Status Alert -->
+                <div id="status-alert" class="rounded-lg p-4 text-sm font-medium"></div>
+
+                <!-- Health Score Card -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Certificate Health Score</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div id="healthScore" class="text-4xl font-bold"></div>
+                            <div id="healthStatus" class="text-lg font-medium"></div>
+                        </div>
+                        <div class="timeline">
+                            <div id="validityProgress" class="timeline-progress"></div>
+                        </div>
+                        <div class="flex justify-between mt-2 text-sm text-gray-600">
+                            <span id="validFrom"></span>
+                            <span id="validUntil"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificate Details Card -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4 flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-800">Certificate Details</h2>
+                        <button id="copyDetails" class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            Copy Details
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Valid Until</label>
+                                    <span id="expiry" class="text-gray-900"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Days Left</label>
+                                    <span id="daysLeft" class="text-gray-900"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Issuer</label>
+                                    <span id="issuer" class="text-gray-900"></span>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Is Wild Card</label>
+                                    <span id="isWildCard" class="text-gray-900"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Self Signed</label>
+                                    <span id="canBeSelfSigned" class="text-gray-900"></span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Valid From</label>
+                                    <span id="validFromDate" class="text-gray-900"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Recommendations -->
+                <div id="recommendations" class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Security Recommendations</h2>
+                    </div>
+                    <div class="p-6">
+                        <ul id="recommendationsList" class="space-y-3 text-gray-700">
+                            <!-- Recommendations will be added here -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Technical Details Card -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Technical Details</h2>
+                    </div>
+                    <div class="p-6">
+                        <pre id="certDetails" class="bg-gray-50 rounded-lg p-4 overflow-x-auto text-sm font-mono"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store recent checks in localStorage
+        const recentChecks = JSON.parse(localStorage.getItem('recentChecks') || '[]');
+        
+        function addToRecent(domain, isValid) {
+            const check = {
+                domain,
+                isValid,
+                timestamp: new Date().toISOString()
+            };
+            
+            recentChecks.unshift(check);
+            if (recentChecks.length > 5) recentChecks.pop();
+            localStorage.setItem('recentChecks', JSON.stringify(recentChecks));
+            updateRecentChecks();
+        }
+
+        function updateRecentChecks() {
+            const recentList = document.getElementById('recentList');
+            recentList.innerHTML = '';
+            
+            recentChecks.forEach(check => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-2 hover:bg-gray-50 rounded';
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full ${check.isValid ? 'bg-green-500' : 'bg-red-500'}"></span>
+                        <span class="text-gray-900">${check.domain}</span>
+                    </div>
+                    <span class="text-sm text-gray-500">${new Date(check.timestamp).toLocaleString()}</span>
+                `;
+                item.onclick = () => {
+                    document.getElementById('domain').value = check.domain;
+                    document.getElementById('sslCheckForm').requestSubmit();
+                };
+                recentList.appendChild(item);
+            });
+            
+            document.getElementById('recentChecks').classList.remove('hidden');
+        }
+
+        function calculateHealthScore(data) {
+            let score = 100;
+            const daysLeft = parseInt(data.daysLeft);
+            
+            // Deduct points for various factors
+            if (daysLeft < 30) score -= 30;
+            if (daysLeft < 7) score -= 30;
+            if (data.canBeSelfSigned) score -= 20;
+            
+            return Math.max(0, score);
+        }
+
+        function getRecommendations(data) {
+            const recommendations = [];
+            const daysLeft = parseInt(data.daysLeft);
+
+            if (daysLeft < 30) {
+                recommendations.push({
+                    type: 'warning',
+                    text: 'Certificate expiring soon. Plan for renewal.'
+                });
+            }
+            if (data.canBeSelfSigned) {
+                recommendations.push({
+                    type: 'danger',
+                    text: 'Self-signed certificates are not recommended for production use.'
+                });
+            }
+            if (!data.isWildCard && data.certDetails?.extensions?.subjectAltName) {
+                recommendations.push({
+                    type: 'info',
+                    text: 'Consider using a wildcard certificate if you have multiple subdomains.'
+                });
+            }
+
+            return recommendations;
+        }
+
+        document.getElementById('copyDetails').addEventListener('click', () => {
+            const details = document.getElementById('certDetails').textContent;
+            navigator.clipboard.writeText(details).then(() => {
+                alert('Certificate details copied to clipboard!');
+            });
+        });
+
+        document.getElementById('sslCheckForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const domain = document.getElementById('domain').value;
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            try {
+                const response = await fetch('/check_ssl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `domain=${encodeURIComponent(domain)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.message);
+                }
+
+                // Update status alert
+                const statusAlert = document.getElementById('status-alert');
+                statusAlert.className = 'rounded-lg p-4 text-sm font-medium ' + 
+                    (data.isvalidCertificate ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800');
+                statusAlert.textContent = data.message;
+
+                // Update certificate details
+                document.getElementById('expiry').textContent = data.expiry;
+                document.getElementById('daysLeft').textContent = data.daysLeft;
+                document.getElementById('issuer').textContent = data.issuer;
+                document.getElementById('isWildCard').textContent = data.isWildCard ? 'Yes' : 'No';
+                document.getElementById('canBeSelfSigned').textContent = data.canBeSelfSigned ? 'Yes' : 'No';
+                document.getElementById('validFromDate').textContent = data.validFromDate;
+                document.getElementById('certDetails').textContent = JSON.stringify(data.certDetails, null, 2);
+
+                // Calculate and display health score
+                const healthScore = calculateHealthScore(data);
+                document.getElementById('healthScore').textContent = healthScore + '/100';
+                const healthStatus = document.getElementById('healthStatus');
+                if (healthScore >= 80) {
+                    healthStatus.textContent = 'Excellent';
+                    healthStatus.className = 'text-lg font-medium text-green-600';
+                } else if (healthScore >= 60) {
+                    healthStatus.textContent = 'Good';
+                    healthStatus.className = 'text-lg font-medium text-yellow-600';
+                } else {
+                    healthStatus.textContent = 'Poor';
+                    healthStatus.className = 'text-lg font-medium text-red-600';
+                }
+
+                // Update timeline
+                const validFrom = new Date(data.validFromDate);
+                const validTo = new Date(data.expiry);
+                const now = new Date();
+                const totalDuration = validTo - validFrom;
+                const elapsed = now - validFrom;
+                const progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+
+                document.getElementById('validityProgress').style.width = `${progress}%`;
+                document.getElementById('validityProgress').className = `timeline-progress ${
+                    progress > 90 ? 'bg-red-500' : progress > 70 ? 'bg-yellow-500' : 'bg-green-500'
+                }`;
+                
+                document.getElementById('validFrom').textContent = validFrom.toLocaleDateString();
+                document.getElementById('validUntil').textContent = validTo.toLocaleDateString();
+
+                // Update recommendations
+                const recommendations = getRecommendations(data);
+                const recommendationsList = document.getElementById('recommendationsList');
+                recommendationsList.innerHTML = '';
+                recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    li.className = `flex items-start gap-2 ${
+                        rec.type === 'danger' ? 'text-red-700' :
+                        rec.type === 'warning' ? 'text-yellow-700' :
+                        'text-blue-700'
+                    }`;
+                    li.innerHTML = `
+                        <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="${rec.type === 'danger' ? 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' :
+                                   rec.type === 'warning' ? 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' :
+                                   'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+                        </svg>
+                        <span>${rec.text}</span>
+                    `;
+                    recommendationsList.appendChild(li);
+                });
+
+                // Add to recent checks
+                addToRecent(domain, data.isvalidCertificate);
+                
+                results.classList.remove('hidden');
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                loading.classList.add('hidden');
+            }
+        });
+
+        // Initialize recent checks on load
+        updateRecentChecks();
+    </script>
+</body>
+</html> 
